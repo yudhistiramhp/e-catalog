@@ -5,7 +5,7 @@ const products = [
   { id: 3, name: 'Prada Songket Kombinasi', description: 'Perpaduan tenun songket dan sentuhan prada di atas dasar coklat tua. Pilihan istimewa untuk kebaya dan kamen.', material: 'Songket, sepuhan emas', size: '2,3 m × 1,1 m', color: '#4A2E1B', pattern: 'dots' },
 ]
 const rituals = [
-  ['♢', 'Dulang', 'Wadah sesaji berkaki dari kayu ukir.'], ['▱', 'Sokasi', 'Keranjang anyaman bambu untuk sesaji.'], ['◯', 'Bokor', 'Wadah logam untuk bunga dan air suci.'], ['⊞', 'Tamas', 'Alas anyaman datar untuk banten.'], ['♨', 'Dupa & Canang', 'Perlengkapan sembahyang harian.'],
+  ['♢', 'Sangku Daksina', 'Wadah untuk daksina.'], ['▱', 'Srembeng', 'Keranjang anyaman sesaji.'], ['◯', 'Sangku', 'Wadah untuk menampung tirta.'], ['⊞', 'Sabuk Prada', 'Kain prada pelengkap upacara.'], ['♨', 'Kekasang', 'Kain pelengkap upacara.'],
 ]
 </script>
 

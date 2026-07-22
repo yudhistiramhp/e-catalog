@@ -31,7 +31,7 @@
       </div>
       <div class="flex flex-wrap justify-between gap-3 pt-6 text-xs text-footer-dim max-sm:flex-col max-sm:text-center">
         <span>&copy; 2026 Griya Prada Bali. Seluruh hak cipta dilindungi.</span>
-        <span>Dibuat dengan tangan di Bali</span>
+        <span>Dikembangkan oleh <a href="https://www.instagram.com/yudhistiramhp" target="_blank" rel="noopener noreferrer">Yudhistira</a></span>
       </div>
     </div>
   </footer>
