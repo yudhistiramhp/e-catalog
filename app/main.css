@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: 'Marcellus', serif;
+  --font-body: 'Lora', serif;
+
+  --color-brown-950: #231409;
+  --color-brown-800: #3E2A1B;
+  --color-brown-700: #5C3D25;
+  --color-gold: #B8935A;
+  --color-gold-soft: #D9BD8E;
+  --color-cream: #FAF6EF;
+  --color-gray: #8B8479;
+  --color-gray-light: #E4DFD3;
+  --color-brown-card: #2C1C10;
+  --color-brown-border: #4A3421;
+  --color-text-muted: #C9BCA9;
+  --color-text-dim: #DED2BC;
+  --color-footer-dim: #8A7660;
+}

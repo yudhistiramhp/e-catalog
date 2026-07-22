@@ -1,0 +1,38 @@
+<template>
+  <footer class="bg-brown-950 px-6 pb-8 pt-16 text-white" id="kontak">
+    <div class="mx-auto max-w-screen-xl">
+      <div class="grid gap-12 border-b border-brown-border pb-11 max-md:grid-cols-1 max-lg:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr]">
+        <div>
+          <NuxtLink to="/" class="flex flex-col leading-none">
+            <span class="font-display text-[1.3rem] tracking-wider text-white">Griya Prada</span>
+            <span class="mt-1 text-[0.62rem] tracking-[0.32em] uppercase text-gold">Bali</span>
+          </NuxtLink>
+          <p class="mt-3.5 max-w-[34ch] text-sm leading-relaxed text-text-muted">
+            Kain prada dan perlengkapan upacara khas Bali, dibuat oleh perajin lokal berdasarkan pesanan.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4 class="mb-4 font-body text-xs font-medium italic uppercase tracking-[0.1em] text-gold-soft">Kontak</h4>
+          <a href="https://wa.me/6281234567890" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            WhatsApp: +62 812-3456-7890
+          </a>
+          <a href="mailto:halo@griyapradabali.id" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            halo@griyapradabali.id
+          </a>
+          <a href="https://instagram.com/griyapradabali" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            @griyapradabali
+          </a>
+        </div>
+        <div class="footer-col">
+          <h4 class="mb-4 font-body text-xs font-medium italic uppercase tracking-[0.1em] text-gold-soft">Lokasi</h4>
+          <p class="block text-sm text-text-dim">Denpasar, Bali, Indonesia</p>
+          <p class="block text-sm text-text-dim">Kunjungan sanggar dengan janji temu</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap justify-between gap-3 pt-6 text-xs text-footer-dim max-sm:flex-col max-sm:text-center">
+        <span>&copy; 2026 Griya Prada Bali. Seluruh hak cipta dilindungi.</span>
+        <span>Dibuat dengan tangan di Bali</span>
+      </div>
+    </div>
+  </footer>
+</template>
