@@ -17,7 +17,7 @@ const product = computed(() => {
 const related = computed(() => products.filter(p => p.id !== id.value).slice(0, 3))
 
 useHead({
-  title: () => product.value ? `${product.value.name} — Griya Prada Bali` : 'Griya Prada Bali',
+  title: () => product.value ? `${product.value.name} — Agung Prada Bali` : 'Agung Prada Bali',
   meta: [{ name: 'description', content: product.value?.description?.slice(0, 160) }],
 })
 </script>
@@ -49,7 +49,7 @@ useHead({
             </svg>
           </div>
           <div class="pt-2">
-            <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">Griya Prada Bali</span>
+            <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">Agung Prada Bali</span>
             <h1 class="mb-4 font-display text-4xl leading-tight max-sm:text-2xl">{{ product.name }}</h1>
             <div class="mb-6 font-display text-2xl text-gold">Rp {{ product.price.toLocaleString('id-ID') }}</div>
             <div class="mb-7 leading-relaxed text-brown-700">{{ product.description }}</div>

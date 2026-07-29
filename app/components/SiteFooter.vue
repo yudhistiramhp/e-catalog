@@ -3,9 +3,9 @@
     <div class="mx-auto max-w-screen-xl">
       <div class="grid gap-12 border-b border-brown-border pb-11 max-md:grid-cols-1 max-lg:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr]">
         <div>
-          <NuxtLink to="/" class="flex flex-col leading-none">
-            <span class="font-display text-[1.3rem] tracking-wider text-white">Griya Prada</span>
-            <span class="mt-1 text-[0.62rem] tracking-[0.32em] uppercase text-gold">Bali</span>
+          <NuxtLink to="/" class="flex items-center gap-2 leading-none">
+            <img src="/logo.png" alt="Agung Prada Bali" class="size-12 rounded-md" />
+            <span class="font-display text-[1.3rem] tracking-wider text-white">Agung Prada Bali</span>
           </NuxtLink>
           <p class="mt-3.5 max-w-[34ch] text-sm leading-relaxed text-text-muted">
             Kain prada dan perlengkapan upacara khas Bali, dibuat oleh perajin lokal berdasarkan pesanan.
@@ -16,11 +16,11 @@
           <a href="https://wa.me/6281234567890" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
             WhatsApp: +62 812-3456-7890
           </a>
-          <a href="mailto:halo@griyapradabali.id" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
-            halo@griyapradabali.id
+          <a href="mailto:halo@agungpradabali.com" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            halo@agungpradabali.com
           </a>
-          <a href="https://instagram.com/griyapradabali" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
-            @griyapradabali
+          <a href="https://instagram.com/agungpradabali" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            @agungpradabali
           </a>
         </div>
         <div class="footer-col">
@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="flex flex-wrap justify-between gap-3 pt-6 text-xs text-footer-dim max-sm:flex-col max-sm:text-center">
-        <span>&copy; 2026 Griya Prada Bali. Seluruh hak cipta dilindungi.</span>
+        <span>&copy; 2026 Agung Prada Bali. Seluruh hak cipta dilindungi.</span>
         <span>Dikembangkan oleh <a href="https://www.instagram.com/yudhistiramhp" target="_blank" rel="noopener noreferrer">Yudhistira</a></span>
       </div>
     </div>

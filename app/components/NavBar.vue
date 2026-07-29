@@ -19,9 +19,12 @@ watch(isOpen, (open) => {
     :class="{ 'shadow-sm': isScrolled }"
   >
     <div class="mx-auto flex h-[78px] max-w-screen-xl items-center justify-between px-6">
-      <NuxtLink to="/" class="flex flex-col leading-none">
-        <span class="font-display text-[1.3rem] tracking-wider">Griya Prada</span>
-        <span class="mt-1 text-[0.62rem] tracking-[0.32em] uppercase text-gold">Bali</span>
+      <NuxtLink to="/" class="flex items-center gap-2 leading-none">
+        <img src="/logo.png" alt="Agung Prada Bali" class="size-12 rounded-md" />
+       <span class="flex flex-col">
+          <span class="font-display text-[1.3rem] tracking-wider">Agung Prada</span>
+          <span class="mt-1 text-[0.62rem] tracking-[0.32em] uppercase text-gold">Bali</span>
+       </span>
       </NuxtLink>
 
       <!-- Desktop nav -->

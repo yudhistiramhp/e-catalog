@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const categories = ['Semua', 'Kain Prada', 'Songket', 'Perlengkapan Upacara']
 const activeCategory = ref('Semua')
+const searchQuery = ref('')
+const sortOrder = ref<'newest' | 'oldest'>('newest')
 
 const products = [
   { id: 1, name: 'Prada Klasik Emas', description: 'Motif bunga dan sulur emas di atas dasar merah marun. Cocok untuk busana upacara dan kain penghias pelinggih.', price: 8_500_000, material: 'Tenun katun, sepuhan emas', size: '2,5 m × 1,1 m', color: '#6B2A2A', pattern: 'classic', category: 'Kain Prada' },
@@ -13,11 +15,19 @@ const products = [
   { id: 8, name: 'Srembeng Anyaman', description: 'Keranjang anyaman sesaji untuk upacara.', price: 800_000, material: 'Bambu anyam', size: '40 cm', color: '#6B4A2A', pattern: 'patra', category: 'Perlengkapan Upacara' },
 ]
 
-const filtered = computed(() =>
-  activeCategory.value === 'Semua'
-    ? products
+const filtered = computed(() => {
+  let result = activeCategory.value === 'Semua'
+    ? [...products]
     : products.filter(p => p.category === activeCategory.value)
-)
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(p => p.name.toLowerCase().includes(q))
+  }
+
+  result.sort((a, b) => sortOrder.value === 'newest' ? b.id - a.id : a.id - b.id)
+  return result
+})
 
 const selectedProduct = ref<typeof products[0] | null>(null)
 const showModal = ref(false)
@@ -34,7 +44,7 @@ function closeModal() {
 }
 
 useHead({
-  title: 'Katalog — Griya Prada Bali',
+  title: 'Katalog — Agung Prada Bali',
   meta: [{ name: 'description', content: 'Jelajahi koleksi kain prada, songket, dan perlengkapan upacara khas Bali.' }],
 })
 </script>
@@ -43,7 +53,7 @@ useHead({
   <main id="top">
     <section class="px-6 pb-10 pt-12 max-sm:pb-6 max-sm:pt-8">
       <div class="mx-auto max-w-7xl">
-        <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">Griya Prada Bali</span>
+        <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">Agung Prada Bali</span>
         <h1 class="mb-4 font-display text-4xl max-sm:text-3xl">Katalog Produk</h1>
         <p class="max-w-[50ch] text-brown-700">Jelajahi koleksi kain prada, songket, dan perlengkapan upacara khas Bali. Semua produk dikerjakan tangan oleh perajin berpengalaman.</p>
       </div>
@@ -51,7 +61,23 @@ useHead({
 
     <section class="px-6 pb-20 max-sm:pb-12">
       <div class="mx-auto max-w-7xl">
-        <div class="mb-10 flex flex-wrap gap-2">
+        <div class="mb-6 flex flex-wrap gap-4">
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Cari produk..."
+            class="w-full max-w-xs border border-brown-800/30 px-4 py-2 text-sm text-brown-950 placeholder:text-brown-400 focus:border-gold focus:outline-none sm:w-auto"
+          />
+          <select
+            v-model="sortOrder"
+            class="border border-brown-800/30 px-4 py-2 text-sm text-brown-950 focus:border-gold focus:outline-none max-sm:w-full"
+          >
+            <option value="newest">Terbaru</option>
+            <option value="oldest">Terlama</option>
+          </select>
+        </div>
+
+        <div class="mb-8 flex flex-wrap gap-2">
           <button
             v-for="cat in categories" :key="cat"
             @click="activeCategory = cat"
