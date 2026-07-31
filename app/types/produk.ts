@@ -1,7 +1,7 @@
 export interface ProdukJenis {
   id: string
   title: string
-  colors: { name: string; hex: string; imageUrl: string }[]
+  colors: { name: string; hex: string; imageUrl: string; stock: number }[]
 }
 
 export interface Produk {
@@ -13,6 +13,7 @@ export interface Produk {
   description: string
   jenis: ProdukJenis[]
   stock: number
+  featured?: boolean
   createdAt: number
   updatedAt: number
 }
@@ -24,4 +25,5 @@ export interface ProdukInput {
   description?: string
   jenis: Omit<ProdukJenis, 'id'>[]
   stock?: number
+  featured?: boolean
 }

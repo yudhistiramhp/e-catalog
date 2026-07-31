@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  FolderKanban,
   LayoutDashboard,
   LogOut,
   PackagePlus,
@@ -68,10 +67,9 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 
 const navItems = [
-  { label: 'Ringkasan', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Produk', icon: ShoppingBag, href: '/dashboard/produk', active: true },
-  { label: 'Kategori', icon: Tags, href: '/dashboard/kategori' },
-  { label: 'Pesanan', icon: FolderKanban, href: '', disabled: true },
+  { label: 'Ringkasan', icon: LayoutDashboard, href: '/dashboard', active: false, disabled: false },
+  { label: 'Produk', icon: ShoppingBag, href: '/dashboard/produk', active: true, disabled: false },
+  { label: 'Kategori', icon: Tags, href: '/dashboard/kategori', active: false, disabled: false },
 ]
 
 const produktList = ref<Produk[]>([])
@@ -81,14 +79,14 @@ const sheetOpen = ref(false)
 const editingId = ref<string | null>(null)
 const formError = ref('')
 const deleteConfirmId = ref<string | null>(null)
+const uploadingMap = ref<Record<string, number>>({}) // key: `${ji}-${ci}`, value: progress 0-100
 
 const form = ref({
   name: '',
   categoryId: '',
   price: 0,
   description: '',
-  stock: 0,
-  jenis: [] as { title: string; colors: { name: string; hex: string; imageUrl: string }[] }[],
+  jenis: [] as { title: string; colors: { name: string; hex: string; imageUrl: string; stock: number }[] }[],
 })
 
 const produkService = useProduk()
@@ -104,7 +102,7 @@ onMounted(() => {
 })
 
 function resetForm() {
-  form.value = { name: '', categoryId: '', price: 0, description: '', stock: 0, jenis: [] }
+  form.value = { name: '', categoryId: '', price: 0, description: '', jenis: [] as { title: string; colors: { name: string; hex: string; imageUrl: string; stock: number }[] }[] }
   editingId.value = null
   formError.value = ''
 }
@@ -115,8 +113,7 @@ function openEdit(item: Produk) {
     categoryId: item.categoryId,
     price: item.price,
     description: item.description,
-    stock: item.stock,
-    jenis: item.jenis.map(j => ({ title: j.title, colors: j.colors })),
+    jenis: item.jenis.map(j => ({ title: j.title, colors: j.colors.map(c => ({ ...c, stock: c.stock ?? 0 })) })),
   }
   editingId.value = item.id
   formError.value = ''
@@ -124,7 +121,7 @@ function openEdit(item: Produk) {
 }
 
 function addJenis() {
-  form.value.jenis.push({ title: '', colors: [{ name: '', hex: '#D9BD8E', imageUrl: '' }] })
+  form.value.jenis.push({ title: '', colors: [{ name: '', hex: '#D9BD8E', imageUrl: '', stock: 0 }] })
 }
 
 function removeJenis(idx: number) {
@@ -132,11 +129,35 @@ function removeJenis(idx: number) {
 }
 
 function addColor(jenisIdx: number) {
-  form.value.jenis[jenisIdx].colors.push({ name: '', hex: '#D9BD8E', imageUrl: '' })
+  const j = form.value.jenis[jenisIdx]
+  if (j) j.colors.push({ name: '', hex: '#D9BD8E', imageUrl: '', stock: 0 })
 }
 
 function removeColor(jenisIdx: number, colorIdx: number) {
-  form.value.jenis[jenisIdx].colors.splice(colorIdx, 1)
+  const j = form.value.jenis[jenisIdx]
+  if (j) j.colors.splice(colorIdx, 1)
+}
+
+async function handleImageUpload(ji: number, ci: number, file: File) {
+  const key = `${ji}-${ci}`
+  uploadingMap.value[key] = 0
+  try {
+    const url = await produkService.uploadImage(file, (pct) => {
+      if (uploadingMap.value[key] !== undefined) uploadingMap.value[key] = pct
+    })
+    const colors = form.value.jenis[ji]?.colors
+    if (colors?.[ci]) colors[ci].imageUrl = url
+  } catch {
+    formError.value = 'Gagal mengupload gambar'
+  } finally {
+    delete uploadingMap.value[key]
+  }
+}
+
+function onFileChange(ji: number, ci: number, event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) handleImageUpload(ji, ci, file)
 }
 
 const kategoriName = computed(() => (id: string) =>
@@ -157,11 +178,11 @@ async function handleSubmit() {
     categoryName: cat?.name ?? '',
     price: form.value.price,
     description: form.value.description.trim(),
-    stock: form.value.stock,
+    stock: form.value.jenis.flatMap(j => j.colors).reduce((sum, c) => sum + (c.stock ?? 0), 0),
     jenis: form.value.jenis.map(j => ({
       ...j,
       title: j.title.trim(),
-      colors: j.colors.filter(c => c.name.trim() || c.imageUrl.trim()),
+      colors: j.colors.filter(c => c.name.trim() || c.imageUrl.trim()).map(c => ({ ...c, stock: c.stock ?? 0 })),
     })).filter(j => j.title),
   }
 
@@ -330,15 +351,9 @@ const userInitials = computed(() => {
                           <option v-for="k in kategoriList" :key="k.id" :value="k.id">{{ k.name }}</option>
                         </select>
                       </div>
-                      <div class="grid grid-cols-2 gap-4">
-                        <div class="grid gap-2">
-                          <Label for="produk-price" class="text-xs font-medium uppercase tracking-wider text-brown-700">Harga (Rp) <span class="text-red-500">*</span></Label>
-                          <Input id="produk-price" v-model.number="form.price" type="number" min="0" placeholder="0" class="rounded-none border-brown-800/30 focus-visible:border-gold" required />
-                        </div>
-                        <div class="grid gap-2">
-                          <Label for="produk-stock" class="text-xs font-medium uppercase tracking-wider text-brown-700">Stok</Label>
-                          <Input id="produk-stock" v-model.number="form.stock" type="number" min="0" placeholder="0" class="rounded-none border-brown-800/30 focus-visible:border-gold" />
-                        </div>
+                      <div class="grid gap-2">
+                        <Label for="produk-price" class="text-xs font-medium uppercase tracking-wider text-brown-700">Harga (Rp) <span class="text-red-500">*</span></Label>
+                        <Input id="produk-price" v-model.number="form.price" type="number" min="0" placeholder="0" class="rounded-none border-brown-800/30 focus-visible:border-gold" required />
                       </div>
                       <div class="grid gap-2">
                         <Label for="produk-desc" class="text-xs font-medium uppercase tracking-wider text-brown-700">Deskripsi</Label>
@@ -383,7 +398,7 @@ const userInitials = computed(() => {
                           </div>
 
                           <div class="space-y-2">
-                            <div v-for="(color, ci) in jenis.colors" :key="ci" class="grid grid-cols-[auto_1fr_2.5fr_auto] items-end gap-2">
+                            <div v-for="(color, ci) in jenis.colors" :key="ci" class="grid grid-cols-[auto_1fr_2.5fr_1fr_auto] items-end gap-2">
                               <div class="flex flex-col gap-1">
                                 <span class="text-[10px] font-medium uppercase tracking-wider text-brown-400">Warna</span>
                                 <label class="relative flex size-9 cursor-pointer items-center justify-center border border-brown-800/30" :title="color.hex">
@@ -396,8 +411,21 @@ const userInitials = computed(() => {
                                 <Input :id="`color-name-${ji}-${ci}`" v-model="color.name" placeholder="Emas" class="h-9 rounded-none border-brown-800/30 text-xs focus-visible:border-gold" />
                               </div>
                               <div class="flex flex-col gap-1">
-                                <span class="text-[10px] font-medium uppercase tracking-wider text-brown-400">URL Gambar</span>
-                                <Input :id="`color-img-${ji}-${ci}`" v-model="color.imageUrl" placeholder="https://..." class="h-9 rounded-none border-brown-800/30 text-xs focus-visible:border-gold" />
+                                <span class="text-[10px] font-medium uppercase tracking-wider text-brown-400">Gambar</span>
+                                <template v-if="!color.imageUrl">
+                                  <label :for="`color-img-${ji}-${ci}`" class="flex h-9 cursor-pointer items-center gap-1 border border-brown-800/30 px-2 text-xs text-brown-500 transition-colors hover:border-gold hover:text-brown-700">
+                                    <span class="truncate">{{ uploadingMap[`${ji}-${ci}`] !== undefined ? `Upload ${uploadingMap[`${ji}-${ci}`]}%...` : 'Pilih file...' }}</span>
+                                  </label>
+                                  <input :id="`color-img-${ji}-${ci}`" type="file" accept="image/*" class="hidden" @change="onFileChange(ji, ci, $event)" />
+                                </template>
+                                <div v-else class="relative group">
+                                  <img :src="color.imageUrl" alt="Preview" class="h-9 w-14 object-cover border border-brown-800/30" />
+                                  <button type="button" class="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-xs opacity-0 transition-opacity group-hover:opacity-100" title="Ganti gambar" @click="color.imageUrl = ''">Ganti</button>
+                                </div>
+                              </div>
+                              <div class="flex flex-col gap-1">
+                                <span class="text-[10px] font-medium uppercase tracking-wider text-brown-400">Stok</span>
+                                <Input :id="`color-stock-${ji}-${ci}`" v-model.number="color.stock" type="number" min="0" placeholder="0" class="h-9 rounded-none border-brown-800/30 text-xs focus-visible:border-gold" />
                               </div>
                               <button type="button" class="mb-px inline-flex size-9 items-center justify-center border border-red-200 bg-red-50 text-red-500 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-30" @click="removeColor(ji, ci)" :disabled="jenis.colors.length <= 1" title="Hapus warna">
                                 <Trash2 class="size-3.5" />

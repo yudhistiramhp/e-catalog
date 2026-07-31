@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   Boxes,
-  FolderKanban,
   LayoutDashboard,
   LogOut,
   PackagePlus,
@@ -42,33 +41,64 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { useAuthSession } from '@/composables/useSession'
+import { useKategori } from '@/composables/useKategori'
+import { useProduk } from '@/composables/useProduk'
+import type { Kategori } from '@/types/kategori'
+import type { Produk } from '@/types/produk'
 
 const { $firebaseAuth } = useNuxtApp()
 const { user, setUser } = useAuthSession()
 const isLoading = ref(false)
 const errorMessage = ref('')
+const produkList = ref<Produk[]>([])
+const kategoriList = ref<Kategori[]>([])
+
+const produkService = useProduk()
+const kategoriService = useKategori()
+
+onMounted(() => {
+  kategoriService.subscribe((items) => { kategoriList.value = items })
+  const unsub = produkService.subscribe((items) => { produkList.value = items })
+  onUnmounted(unsub)
+})
 
 const navItems = [
-  { label: 'Ringkasan', icon: LayoutDashboard, href: '/dashboard', active: true },
-  { label: 'Produk', icon: ShoppingBag, href: '/dashboard/produk' },
-  { label: 'Kategori', icon: Tags, href: '/dashboard/kategori' },
-  { label: 'Pesanan', icon: FolderKanban, href: '', disabled: true },
+  { label: 'Ringkasan', icon: LayoutDashboard, href: '/dashboard', active: true, disabled: false },
+  { label: 'Produk', icon: ShoppingBag, href: '/dashboard/produk', active: false, disabled: false },
+  { label: 'Kategori', icon: Tags, href: '/dashboard/kategori', active: false, disabled: false },
 ]
 
-const stats = [
-  { label: 'Total Produk', value: '24', note: '3 produk baru bulan ini', icon: Boxes },
-  { label: 'Total Kategori', value: '6', note: 'Kain dan perlengkapan upacara', icon: Tags },
-  { label: 'Pesanan Baru', value: '8', note: 'Menunggu konfirmasi', icon: ShoppingBag },
-  { label: 'Stok Menipis', value: '3', note: 'Perlu segera diperbarui', icon: TriangleAlert },
-]
+const lowStockThreshold = 4
+const lowStockCount = computed(() => produkList.value.filter(p => {
+  const colors = p.jenis?.flatMap(j => j.colors) ?? []
+  return colors.some(c => (c.stock ?? 0) <= lowStockThreshold)
+}).length)
 
-const products = [
-  { name: 'Prada Klasik Emas', category: 'Kain Prada', price: 'Rp1.250.000', stock: 12 },
-  { name: 'Prada Patra Punggel', category: 'Kain Prada', price: 'Rp1.100.000', stock: 4 },
-  { name: 'Prada Songket Kombinasi', category: 'Kain Prada', price: 'Rp1.450.000', stock: 8 },
-  { name: 'Sangku Daksina', category: 'Alat Upacara', price: 'Rp275.000', stock: 3 },
-  { name: 'Sabuk Prada', category: 'Pelengkap', price: 'Rp325.000', stock: 15 },
-]
+const stockBreakdown = (p: Produk) => p.jenis?.flatMap(j =>
+  j.colors.map(c => `${c.name || '—'} ${c.stock ?? 0}`)
+).join(' · ') ?? ''
+
+const isLowStock = (p: Produk) => {
+  const colors = p.jenis?.flatMap(j => j.colors) ?? []
+  return colors.some(c => (c.stock ?? 0) <= lowStockThreshold)
+}
+
+const stats = computed(() => [
+  { label: 'Total Produk', value: String(produkList.value.length), note: 'Seluruh produk terdaftar', icon: Boxes },
+  { label: 'Total Kategori', value: String(kategoriList.value.length), note: 'Kategori aktif', icon: Tags },
+  { label: 'Stok Menipis', value: String(lowStockCount.value), note: `Stok ≤ ${lowStockThreshold}`, icon: TriangleAlert },
+])
+
+const products = computed(() => produkList.value.slice(0, 5))
+
+const featuredCount = computed(() => produkList.value.filter(p => p.featured).length)
+const isFeaturedDisabled = (product: Produk) =>
+  featuredCount.value >= 3 && !(product.featured ?? false)
+
+const toggleFeatured = async (product: Produk) => {
+  if (isFeaturedDisabled(product)) return
+  await produkService.toggleFeatured(product.id, !(product.featured ?? false))
+}
 
 const userInitials = computed(() => {
   const source = user.value?.name || user.value?.email || 'Admin'
@@ -253,26 +283,26 @@ const logout = async () => {
             Pantau katalog, pesanan, dan ketersediaan produk Agung Prada Bali dari satu tempat.
           </p>
 
-          <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <Card
               v-for="stat in stats"
               :key="stat.label"
-              class="rounded-none border-gray-light bg-cream text-brown-950 shadow-none transition-colors hover:border-gold"
+              class="relative overflow-hidden rounded-none border-gray-light bg-cream text-brown-950 shadow-none transition-colors hover:border-gold"
             >
-              <CardHeader class="flex-row items-start justify-between gap-4">
-                <div>
-                  <CardDescription class="text-brown-700">
-                    {{ stat.label }}
-                  </CardDescription>
-                  <CardTitle class="mt-2 font-display text-3xl text-brown-950">
-                    {{ stat.value }}
-                  </CardTitle>
-                </div>
-                <div class="border border-gold/40 bg-gold/10 p-2 text-gold">
-                  <component :is="stat.icon" class="size-5" aria-hidden="true" />
-                </div>
+              <component
+                :is="stat.icon"
+                class="absolute -right-3 -top-3 size-20 text-gold/10"
+                aria-hidden="true"
+              />
+              <CardHeader class="relative">
+                <CardTitle class="font-display text-4xl text-brown-950">
+                  {{ stat.value }}
+                </CardTitle>
+                <CardDescription class="mt-1 text-brown-700">
+                  {{ stat.label }}
+                </CardDescription>
               </CardHeader>
-              <CardContent class="text-xs text-gray">
+              <CardContent class="relative text-xs text-gray">
                 {{ stat.note }}
               </CardContent>
             </Card>
@@ -282,10 +312,13 @@ const logout = async () => {
         <Card class="mt-8 rounded-none border-gray-light bg-cream text-brown-950 shadow-none">
           <CardHeader class="border-b border-gray-light">
             <CardTitle class="font-display text-2xl text-brown-950">
-              Produk Terbaru
+              Produk Featured
+              <span class="ml-2 rounded-full border px-2.5 py-0.5 text-sm font-normal" :class="featuredCount >= 3 ? 'border-gold bg-gold/10 text-gold' : 'border-gray-light text-brown-700'">
+                {{ featuredCount }}/3
+              </span>
             </CardTitle>
             <CardDescription class="text-brown-700">
-              Data contoh katalog terbaru. Manajemen produk tersedia setelah API produk ditambahkan.
+              Centang produk yang ingin ditampilkan di halaman utama. Maksimal 3 produk.
             </CardDescription>
           </CardHeader>
           <CardContent class="overflow-x-auto p-0">
@@ -296,23 +329,35 @@ const logout = async () => {
                   <th scope="col" class="px-6 py-4 font-medium">Kategori</th>
                   <th scope="col" class="px-6 py-4 font-medium">Harga</th>
                   <th scope="col" class="px-6 py-4 font-medium">Stok</th>
+                  <th scope="col" class="px-6 py-4 font-medium">Tampil di Home</th>
                   <th scope="col" class="px-6 py-4 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-light">
                 <tr v-for="product in products" :key="product.name" class="transition-colors hover:bg-[#F3EEE3]/60">
                   <td class="px-6 py-4 font-medium text-brown-950">{{ product.name }}</td>
-                  <td class="px-6 py-4 text-brown-700">{{ product.category }}</td>
-                  <td class="px-6 py-4 text-brown-700">{{ product.price }}</td>
-                  <td class="px-6 py-4 tabular-nums text-brown-700">{{ product.stock }}</td>
+                  <td class="px-6 py-4 text-brown-700">{{ product.categoryName }}</td>
+                  <td class="px-6 py-4 text-brown-700">Rp {{ product.price.toLocaleString('id-ID') }}</td>
+                  <td class="px-6 py-4 text-brown-700">{{ stockBreakdown(product) }}</td>
+                  <td class="px-6 py-4 text-center">
+                    <input
+                      type="checkbox"
+                      :checked="product.featured ?? false"
+                      :disabled="isFeaturedDisabled(product)"
+                      class="size-4 accent-gold"
+                      :class="isFeaturedDisabled(product) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'"
+                      :aria-label="`Tampilkan ${product.name} di halaman utama`"
+                      @change="toggleFeatured(product)"
+                    />
+                  </td>
                   <td class="px-6 py-4">
                     <span
                       class="inline-flex whitespace-nowrap border px-2.5 py-1 text-xs"
-                      :class="product.stock <= 4
+                      :class="isLowStock(product)
                         ? 'border-gold bg-gold/10 text-brown-700'
                         : 'border-gray-light bg-white text-brown-700'"
                     >
-                      {{ product.stock <= 4 ? 'Stok menipis' : 'Tersedia' }}
+                      {{ isLowStock(product) ? 'Stok menipis' : 'Tersedia' }}
                     </span>
                   </td>
                 </tr>

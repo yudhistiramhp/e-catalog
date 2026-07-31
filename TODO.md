@@ -86,3 +86,24 @@
 #### NOTES
 
 - BERI TANDA [x] JIKA TASK SUDAH SELESAI
+
+
+### [x] TASK-005 — Mengintegrasikan Data
+
+- **Priority:** High
+- **Goal:** Memastikan menampilkan seluruh data yang ditambahkan ke sistem
+- **Scope:** Integrasi Data ke sistem
+
+#### Acceptance criteria
+
+- [x] Tampilkan seluruh data yang ditambahkan ke dashboard, catalog
+- [x] Pastikan setiap produk yang ditampilkan datanya sama dengan apa yang ditambahkan
+
+
+#### Verification
+
+- [x] pastikan mengintegrasikan dengan baik
+
+#### NOTES
+
+- BERI TANDA [x] JIKA TASK SUDAH SELESAI

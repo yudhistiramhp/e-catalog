@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  FolderKanban,
   LayoutDashboard,
   LogOut,
   Pencil,
@@ -65,10 +64,9 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 
 const navItems = [
-  { label: 'Ringkasan', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Produk', icon: ShoppingBag, href: '/dashboard/produk' },
-  { label: 'Kategori', icon: Tags, href: '/dashboard/kategori', active: true },
-  { label: 'Pesanan', icon: FolderKanban, href: '', disabled: true },
+  { label: 'Ringkasan', icon: LayoutDashboard, href: '/dashboard', active: false, disabled: false },
+  { label: 'Produk', icon: ShoppingBag, href: '/dashboard/produk', active: false, disabled: false },
+  { label: 'Kategori', icon: Tags, href: '/dashboard/kategori', active: true, disabled: false },
 ]
 
 const kategoriList = ref<Kategori[]>([])

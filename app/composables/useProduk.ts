@@ -25,6 +25,17 @@ export const useProduk = () => {
       (err: Error) => console.error('[useProduk] subscribe error:', err),
     )
 
+  const subscribeOne = (
+    id: string,
+    onData: (item: Produk | null) => void,
+    onError: (err: Error) => void,
+  ) =>
+    onSnapshot(
+      doc(fs, 'produk', id),
+      (snap) => onData(snap.exists() ? ({ id: snap.id, ...snap.data() } as Produk) : null),
+      onError,
+    )
+
   const add = async (input: ProdukInput): Promise<string> => {
     const ref = await addDoc(collection(fs, 'produk'), {
       ...input,
@@ -50,5 +61,27 @@ export const useProduk = () => {
     await deleteDoc(doc(fs, 'produk', id))
   }
 
-  return { subscribe, add, update, remove }
+  const toggleFeatured = async (id: string, featured: boolean): Promise<void> => {
+    await updateDoc(doc(fs, 'produk', id), { featured })
+  }
+
+  const uploadImage = async (
+    file: File,
+    onProgress?: (pct: number) => void,
+  ): Promise<string> => {
+    const body = new FormData()
+    body.append('file', file)
+    const res = await $fetch('/api/upload', {
+      method: 'POST',
+      body,
+      onResponseProgress(progress) {
+        if (onProgress && progress.total) {
+          onProgress(Math.round((progress.loaded / progress.total) * 100))
+        }
+      },
+    })
+    return res.url
+  }
+
+  return { subscribe, subscribeOne, add, update, remove, toggleFeatured, uploadImage }
 }

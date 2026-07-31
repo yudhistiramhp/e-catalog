@@ -1,5 +1,4 @@
 import { createFirebaseClient } from '@/config/firebase'
-import { getFirestore } from 'firebase/firestore'
 
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
