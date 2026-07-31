@@ -495,8 +495,8 @@ const userInitials = computed(() => {
 
         <Teleport to="body">
           <Transition name="modal">
-            <div v-if="deleteConfirmId" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" @click.self="deleteConfirmId = null">
-              <div class="w-full max-w-sm bg-cream p-6 shadow-2xl">
+            <div v-if="deleteConfirmId" class="fixed inset-0 z-50 flex overflow-y-auto bg-black/60 p-4 backdrop-blur-sm" @click.self="deleteConfirmId = null">
+              <div class="m-auto w-full max-w-sm bg-cream p-6 shadow-2xl">
                 <h3 class="mb-2 font-display text-lg text-brown-950">Hapus Produk?</h3>
                 <p class="mb-6 text-sm text-brown-700">Produk <strong>{{ produktList.find(p => p.id === deleteConfirmId)?.name }}</strong> akan dihapus permanen.</p>
                 <div class="flex justify-end gap-3">
