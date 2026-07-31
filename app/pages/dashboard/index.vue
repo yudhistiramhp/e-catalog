@@ -339,7 +339,7 @@ const logout = async () => {
                   <td class="px-6 py-4 text-brown-700">{{ product.categoryName }}</td>
                   <td class="px-6 py-4 text-brown-700">Rp {{ product.price.toLocaleString('id-ID') }}</td>
                   <td class="px-6 py-4 text-brown-700">{{ stockBreakdown(product) }}</td>
-                  <td class="px-6 py-4 text-center">
+                  <td class="px-18 py-4">
                     <input
                       type="checkbox"
                       :checked="product.featured ?? false"
