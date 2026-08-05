@@ -115,7 +115,7 @@ const rituals = [
 
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="showModal" class="fixed inset-0 z-50 flex overflow-y-auto bg-black/70 p-4 backdrop-blur-md" @click.self="closeModal">
+        <div v-if="showModal" class="fixed inset-0 z-[60] flex overflow-y-auto bg-black/70 p-4 backdrop-blur-md" @click.self="closeModal">
           <div v-if="selectedProduct" class="relative m-auto flex max-h-[calc(100dvh-2rem)] min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-cream shadow-[0_25px_70px_-15px_rgba(0,0,0,0.5)] ring-1 ring-brown-border/40">
             <button @click="closeModal" class="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-cream/90 text-brown-700 shadow-md backdrop-blur transition-all duration-200 hover:rotate-90 hover:bg-brown-950 hover:text-cream max-sm:h-8 max-sm:w-8 max-sm:text-sm">✕</button>
             <div class="grid min-h-0 flex-1 overflow-y-auto md:grid-cols-2" style="-webkit-overflow-scrolling: touch;">
