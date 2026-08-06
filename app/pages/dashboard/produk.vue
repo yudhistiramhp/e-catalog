@@ -79,7 +79,18 @@ const sheetOpen = ref(false)
 const editingId = ref<string | null>(null)
 const formError = ref('')
 const deleteConfirmId = ref<string | null>(null)
+const searchQuery = ref('')
 const uploadingMap = ref<Record<string, number>>({}) // key: `${ji}-${ci}`, value: progress 0-100
+
+const filteredProducts = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim()
+  if (!q) return produktList.value
+  return produktList.value.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.categoryName.toLowerCase().includes(q) ||
+    p.description?.toLowerCase().includes(q),
+  )
+})
 
 const form = ref({
   name: '',
@@ -453,8 +464,25 @@ const userInitials = computed(() => {
 
         <Card class="mt-8 rounded-none border-gray-light bg-cream text-brown-950 shadow-none">
           <CardHeader class="border-b border-gray-light">
-            <CardTitle class="font-display text-2xl text-brown-950">Daftar Produk</CardTitle>
-            <CardDescription class="text-brown-700">{{ produktList.length }} produk terdaftar.</CardDescription>
+            <div class="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <CardTitle class="font-display text-2xl text-brown-950">Daftar Produk</CardTitle>
+                <CardDescription class="text-brown-700">{{ filteredProducts.length }} dari {{ produktList.length }} produk terdaftar.</CardDescription>
+              </div>
+              <div class="relative w-full sm:w-72">
+                <Input
+                  v-model="searchQuery"
+                  type="search"
+                  placeholder="Cari produk, kategori..."
+                  class="rounded-none border-brown-800/30 pl-9 focus-visible:border-gold"
+                  aria-label="Cari produk"
+                />
+                <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brown-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" stroke-width="2" />
+                  <path d="m21 21-4.3-4.3" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </div>
+            </div>
           </CardHeader>
           <CardContent class="overflow-x-auto p-0">
             <div v-if="loadingData" class="space-y-4 p-6">
@@ -464,6 +492,9 @@ const userInitials = computed(() => {
               <ShoppingBag class="mx-auto mb-4 size-10 text-brown-400" />
               <p class="text-sm text-brown-700">Belum ada produk.</p>
               <p class="mt-1 text-xs text-brown-400">Klik "Tambah Produk" untuk memulai.</p>
+            </div>
+            <div v-else-if="filteredProducts.length === 0" class="py-16 text-center">
+              <p class="text-sm text-brown-700">Tidak ada produk yang cocok dengan "{{ searchQuery }}".</p>
             </div>
             <table v-else class="min-w-full w-full text-left text-sm">
               <thead class="border-b border-gray-light bg-[#F3EEE3] text-xs uppercase tracking-wider text-brown-700">
@@ -476,7 +507,7 @@ const userInitials = computed(() => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-light">
-                <tr v-for="item in produktList" :key="item.id" class="transition-colors hover:bg-[#F3EEE3]/60">
+                <tr v-for="item in filteredProducts" :key="item.id" class="transition-colors hover:bg-[#F3EEE3]/60">
                   <td class="px-6 py-4 font-medium text-brown-950">{{ item.name }}</td>
                   <td class="px-6 py-4 text-brown-700 max-md:hidden">{{ kategoriName(item.categoryId) }}</td>
                   <td class="px-6 py-4 tabular-nums text-brown-700">Rp {{ item.price.toLocaleString('id-ID') }}</td>

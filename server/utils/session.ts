@@ -1,6 +1,6 @@
 import type { DecodedIdToken } from 'firebase-admin/auth'
 import type { H3Event } from 'h3'
-import { firebaseAdminAuth } from './firebase-admin'
+import { getFirebaseAdminAuth } from './firebase-admin'
 import { SESSION_MAX_AGE_SECONDS } from './session-policy'
 
 export const SESSION_COOKIE_NAME = '__session'
@@ -34,7 +34,7 @@ export const getSessionUser = async (event: H3Event) => {
   }
 
   try {
-    return toSessionUser(await firebaseAdminAuth.verifySessionCookie(cookie))
+    return toSessionUser(await getFirebaseAdminAuth().verifySessionCookie(cookie))
   }
   catch {
     clearSessionCookie(event)

@@ -1,4 +1,4 @@
-import { firebaseAdminAuth } from '../../utils/firebase-admin'
+import { getFirebaseAdminAuth } from '../../utils/firebase-admin'
 import { setSessionCookie, toSessionUser } from '../../utils/session'
 import {
   isRecentLogin,
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   let decoded
   try {
-    decoded = await firebaseAdminAuth.verifyIdToken(idToken)
+    decoded = await getFirebaseAdminAuth().verifyIdToken(idToken)
   }
   catch (error) {
     console.error('[auth/session] Firebase ID token verification failed:', error)
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'Recent login required' })
   }
 
-  const sessionCookie = await firebaseAdminAuth.createSessionCookie(idToken, {
+  const sessionCookie = await getFirebaseAdminAuth().createSessionCookie(idToken, {
     expiresIn: SESSION_MAX_AGE_SECONDS * 1_000,
   })
 
