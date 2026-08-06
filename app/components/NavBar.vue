@@ -30,9 +30,9 @@ watch(isOpen, (open) => {
       <!-- Desktop nav -->
       <ul class="hidden gap-9 lg:flex">
         <li v-for="item in navItems" :key="item.href">
-          <NuxtLink :to="item.href" class="relative pb-1 text-sm tracking-wider transition-colors hover:text-gold">
+          <a :href="item.href" class="relative pb-1 text-sm tracking-wider transition-colors hover:text-gold">
             {{ item.label }}
-          </NuxtLink>
+          </a>
         </li>
       </ul>
 
