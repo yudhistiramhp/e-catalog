@@ -1,6 +1,7 @@
 import { readMultipartFormData } from 'h3'
-import { writeFileSync, mkdirSync } from 'fs'
-import { join } from 'path'
+import { v2 as cloudinary } from 'cloudinary'
+
+cloudinary.config({ url: process.env.CLOUDINARY_URL })
 
 export default defineEventHandler(async (event) => {
   const parts = await readMultipartFormData(event)
@@ -9,14 +10,14 @@ export default defineEventHandler(async (event) => {
   const file = parts.find(p => p.name === 'file')
   if (!file?.data || !file.filename) throw createError({ statusCode: 400, statusMessage: 'File field required' })
 
-  const ext = file.filename.split('.').pop()?.toLowerCase() || 'bin'
+  const ext = file.filename.split('.').pop()?.toLowerCase() || ''
   const allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif']
   if (!allowed.includes(ext)) throw createError({ statusCode: 400, statusMessage: 'Only images allowed' })
 
-  const filename = `${Date.now()}-${file.filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-  const uploadDir = join(process.cwd(), 'public', 'uploads')
-  mkdirSync(uploadDir, { recursive: true })
-  writeFileSync(join(uploadDir, filename), file.data)
+  const buffer = file.data.toString('base64')
+  const result = await cloudinary.uploader.upload(`data:image/${ext};base64,${buffer}`, {
+    folder: 'e-catalog'
+  })
 
-  return { url: `/uploads/${filename}` }
+  return { url: result.secure_url }
 })
