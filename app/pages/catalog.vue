@@ -241,7 +241,7 @@ useHead({
 
                 <div v-if="modalJenisList.length" class="mb-6 rounded-xl border border-brown-border/70 bg-cream p-4 shadow-sm">
                   <div class="mb-4">
-                    <h3 class="mb-2.5 text-[11px] font-medium uppercase tracking-widest text-brown-700">Pilih Jenis</h3>
+                    <h3 class="mb-2.5 text-[11px] font-medium uppercase tracking-widest text-brown-700">Jenis</h3>
                     <div class="flex flex-wrap gap-2" role="group" aria-label="Pilihan jenis produk">
                       <button
                         v-for="(jenis, index) in modalJenisList"

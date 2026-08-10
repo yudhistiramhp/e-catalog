@@ -116,7 +116,7 @@ useHead(() => ({
         <div class="pt-2">
           <div v-if="jenisList.length" class="mb-8 rounded-lg border border-brown-border/70 bg-cream p-5">
             <div class="mb-5">
-              <h2 class="mb-2.5 text-[11px] font-medium uppercase tracking-widest text-brown-700">Pilih Jenis</h2>
+              <h2 class="mb-2.5 text-[11px] font-medium uppercase tracking-widest text-brown-700">Jenis</h2>
               <div class="flex flex-wrap gap-2" role="group" aria-label="Pilihan jenis produk">
                 <button
                   v-for="(jenis, index) in jenisList"

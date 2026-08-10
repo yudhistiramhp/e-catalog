@@ -76,13 +76,84 @@ function closeModal() {
 const rituals = [
   ['♢', 'Sangku Daksina', 'Wadah untuk daksina.'], ['▱', 'Srembeng', 'Keranjang anyaman sesaji.'], ['◯', 'Sangku', 'Wadah untuk menampung tirta.'], ['⊞', 'Sabuk Prada', 'Kain prada pelengkap upacara.'], ['♨', 'Kekasang', 'Kain pelengkap upacara.'],
 ]
+
+// Slideshow
+const slides = [
+  { image: 'https://res.cloudinary.com/duawnlihs/image/upload/v1786350520/emas_a3an5f.jpg', span: 'Warisan Perajin Bali', h1: 'Kain Prada & Perlengkapan Upacara Khas Bali', p: 'Kain prada tenun tangan bersepuh emas, disertai perlengkapan upacara pilihan, dibuat oleh perajin di Bali untuk melengkapi setiap persembahan dan perayaan.' },
+  { image: 'https://res.cloudinary.com/duawnlihs/image/upload/v1786350695/merah_x6xwgq.jpg', span: 'Motif Eksklusif', h1: 'Sepuhan Emas Tradisional', p: 'Setiap motif digambar dan disepuh satu per satu oleh tangan terampil para perajin Bali dengan teknik yang diwariskan turun-temurun.' },
+  { image: 'https://res.cloudinary.com/duawnlihs/image/upload/v1786352003/hitam_kuvvmz.jpg', span: 'Made in Bali', h1: 'Perlengkapan Upacara Lengkap', p: 'Kain prada, sangku, dan berbagai alat upacara Bali tersedia untuk melengkapi setiap persembahan dan perayaan adat Anda.' },
+]
+const currentSlide = ref(0)
+const currentSlideData = computed(() => slides[currentSlide.value]!)
+let slideInterval: ReturnType<typeof setInterval> | null = null
+
+function goToSlide(index: number) {
+  currentSlide.value = index
+  resetInterval()
+}
+
+function nextSlide() {
+  currentSlide.value = (currentSlide.value + 1) % slides.length
+}
+
+function resetInterval() {
+  if (slideInterval) clearInterval(slideInterval)
+  slideInterval = setInterval(nextSlide, 5000)
+}
+
+onMounted(() => {
+  resetInterval()
+})
+
+onUnmounted(() => {
+  if (slideInterval) clearInterval(slideInterval)
+})
 </script>
 
 <template>
   <main id="top">
-    <section class="flex min-h-[70vh] items-center px-6 py-24 max-lg:py-16 max-sm:py-10"><div class="mx-auto max-w-screen-xl text-center">
-      <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">Warisan Perajin Bali</span><h1 class="mb-5 font-display text-5xl leading-tight max-lg:text-4xl max-sm:text-3xl">Kain Prada &amp; Perlengkapan Upacara Khas Bali</h1><p class="mx-auto mb-8 max-w-[46ch] text-brown-700">Kain prada tenun tangan bersepuh emas, disertai perlengkapan upacara pilihan, dibuat oleh perajin di Bali untuk melengkapi setiap persembahan dan perayaan.</p><div class="flex flex-wrap justify-center gap-4"><a href="#kain-prada" class="bg-brown-950 px-7 py-3 text-sm text-cream transition hover:bg-brown-700">Lihat Kain Prada</a><NuxtLink to="/catalog" class="border border-gold px-7 py-3 text-sm text-gold transition hover:bg-gold hover:text-white">Lihat Katalog</NuxtLink><a href="#alat-upacara" class="border border-brown-border px-7 py-3 text-sm text-brown-700 transition hover:border-gold hover:text-gold">Lihat Alat Upacara</a></div>
-    </div></section>
+    <section class="relative overflow-hidden">
+      <div class="relative h-[70vh] min-h-[480px] max-sm:h-[60vh]">
+        <TransitionGroup name="slide-fade">
+          <img
+            v-for="(slide, index) in slides"
+            :key="slide.image"
+            v-show="index === currentSlide"
+            :src="slide.image"
+            :alt="slide.h1"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+        </TransitionGroup>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
+        <div class="relative z-10 flex h-full items-center px-6 py-24 max-lg:py-16 max-sm:py-10">
+          <div class="mx-auto max-w-screen-xl text-center">
+            <Transition name="fade-up" mode="out-in">
+              <div :key="currentSlide">
+                <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">{{ currentSlideData.span }}</span>
+                <h1 class="mb-5 font-display text-5xl leading-tight text-cream max-lg:text-4xl max-sm:text-3xl">{{ currentSlideData.h1 }}</h1>
+                <p class="mx-auto mb-8 max-w-[46ch] text-cream/90">{{ currentSlideData.p }}</p>
+              </div>
+            </Transition>
+            <div class="flex flex-wrap justify-center gap-4">
+              <!-- <a href="#kain-prada" class="bg-brown-950 px-7 py-3 text-sm text-cream transition hover:bg-brown-700">Lihat Kain Prada</a> -->
+              <NuxtLink to="/catalog" class="border border-gold px-7 py-3 text-sm text-white transition hover:bg-gold hover:text-white">Lihat Katalog</NuxtLink>
+              <!-- <a href="#alat-upacara" class="border border-brown-border px-7 py-3 text-sm text-brown-700 transition hover:border-gold hover:text-gold">Lihat Alat Upacara</a> -->
+            </div>
+          </div>
+        </div>
+        <div class="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-3">
+          <button
+            v-for="(slide, index) in slides"
+            :key="slide.image"
+            type="button"
+            :aria-label="`Tampilkan slide ${index + 1}`"
+            class="h-2.5 w-2.5 rounded-full transition-all"
+            :class="index === currentSlide ? 'w-8 bg-gold' : 'bg-cream/50 hover:bg-cream'"
+            @click="goToSlide(index)"
+          ></button>
+        </div>
+      </div>
+    </section>
     <section id="kain-prada" class="bg-brown-950 px-6 py-24 text-white max-sm:py-12"><div class="mx-auto max-w-screen-xl"><div class="mb-12 max-w-[60ch]"><span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold-soft">Koleksi Utama</span><h2 class="mb-4 font-display text-4xl max-sm:text-3xl">Kain Prada</h2><p class="text-text-muted">Prada adalah teknik menyepuh kain dengan serbuk atau lembaran emas, dikerjakan tangan di atas kain tenun. Setiap motif digambar dan disepuh satu per satu, menjadikan tiap lembar kain unik.</p></div>
       <div v-if="loadingData" class="py-20 text-center text-sm text-text-muted">Memuat produk...</div>
       <div v-else-if="featuredProducts.length" class="grid gap-8 md:grid-cols-3 max-md:gap-5">
@@ -160,7 +231,7 @@ const rituals = [
 
                 <div v-if="modalJenisList.length" class="mb-6 rounded-xl border border-brown-border/70 bg-cream p-4 shadow-sm">
                   <div class="mb-4">
-                    <h3 class="mb-2.5 text-[11px] font-medium uppercase tracking-widest text-brown-700">Pilih Jenis</h3>
+                    <h3 class="mb-2.5 text-[11px] font-medium uppercase tracking-widest text-brown-700">Jenis</h3>
                     <div class="flex flex-wrap gap-2" role="group" aria-label="Pilihan jenis produk">
                       <button
                         v-for="(jenis, index) in modalJenisList"
@@ -233,6 +304,17 @@ const rituals = [
 </template>
 
 <style scoped>
+/* Slideshow transitions */
+.slide-fade-enter-active,
+.slide-fade-leave-active { transition: opacity 1s ease; }
+.slide-fade-enter-from,
+.slide-fade-leave-to { opacity: 0; }
+
+.fade-up-enter-active,
+.fade-up-leave-active { transition: all 0.5s ease; }
+.fade-up-enter-from { opacity: 0; transform: translateY(16px); }
+.fade-up-leave-to { opacity: 0; transform: translateY(-16px); }
+
 .modal-enter-active,
 .modal-leave-active { transition: all 0.3s ease; }
 .modal-enter-from,
