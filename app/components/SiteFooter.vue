@@ -13,20 +13,20 @@
         </div>
         <div class="footer-col">
           <h4 class="mb-4 font-body text-xs font-medium italic uppercase tracking-[0.1em] text-gold-soft">Kontak</h4>
-          <a href="https://wa.me/6281234567890" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
-            WhatsApp: +62 812-3456-7890
+          <a href="https://wa.me/08123968327" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            WhatsApp: +62 812-3968-327
           </a>
-          <a href="mailto:halo@agungpradabali.com" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
-            halo@agungpradabali.com
+          <a href="mailto:agungpradabali@gmail.com" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            agungpradabali@gmail.com
           </a>
-          <a href="https://instagram.com/agungpradabali" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+          <a href="https://instagram.com//agungprada2026" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
             @agungpradabali
           </a>
         </div>
         <div class="footer-col">
           <h4 class="mb-4 font-body text-xs font-medium italic uppercase tracking-[0.1em] text-gold-soft">Lokasi</h4>
-          <p class="block text-sm text-text-dim">Denpasar, Bali, Indonesia</p>
-          <p class="block text-sm text-text-dim">Kunjungan sanggar dengan janji temu</p>
+          <p class="block text-sm text-text-dim">Jalan Gunung Andakasa Gang Kamboja I/20X</p>
+          <p class="block text-sm text-text-dim">Lingkungan Penamparan, Padang Sambian Denpasar</p>
         </div>
       </div>
       <div class="flex flex-wrap justify-between gap-3 pt-6 text-xs text-footer-dim max-sm:flex-col max-sm:text-center">
