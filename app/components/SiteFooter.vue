@@ -20,7 +20,7 @@
             agungpradabali@gmail.com
           </a>
           <a href="https://instagram.com//agungprada2026" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
-            @agungpradabali
+            @agungprada2026
           </a>
         </div>
         <div class="footer-col">
