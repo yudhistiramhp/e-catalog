@@ -26,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import Pagination from '@/components/ui/pagination.vue'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -80,16 +81,33 @@ const editingId = ref<string | null>(null)
 const formError = ref('')
 const deleteConfirmId = ref<string | null>(null)
 const searchQuery = ref('')
+const currentPage = ref(1)
+const perPage = 10
 const uploadingMap = ref<Record<string, number>>({}) // key: `${ji}-${ci}`, value: progress 0-100
 
 const filteredProducts = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
-  if (!q) return produktList.value
+  const list = q
+    ? produktList.value.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.categoryName.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q),
+      )
+    : produktList.value
+  const start = (currentPage.value - 1) * perPage
+  return list.slice(start, start + perPage)
+})
+
+watch(searchQuery, () => { currentPage.value = 1 })
+
+const filteredTotal = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim()
+  if (!q) return produktList.value.length
   return produktList.value.filter(p =>
     p.name.toLowerCase().includes(q) ||
     p.categoryName.toLowerCase().includes(q) ||
     p.description?.toLowerCase().includes(q),
-  )
+  ).length
 })
 
 const form = ref({
@@ -467,7 +485,7 @@ const userInitials = computed(() => {
             <div class="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <CardTitle class="font-display text-2xl text-brown-950">Daftar Produk</CardTitle>
-                <CardDescription class="text-brown-700">{{ filteredProducts.length }} dari {{ produktList.length }} produk terdaftar.</CardDescription>
+                <CardDescription class="text-brown-700">{{ filteredTotal }} dari {{ produktList.length }} produk terdaftar.</CardDescription>
               </div>
               <div class="relative w-full sm:w-72">
                 <Input
@@ -521,6 +539,11 @@ const userInitials = computed(() => {
                 </tr>
               </tbody>
             </table>
+            <Pagination
+              :total="filteredTotal"
+              :per-page="perPage"
+              v-model="currentPage"
+            />
           </CardContent>
         </Card>
 

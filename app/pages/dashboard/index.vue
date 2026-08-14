@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import Pagination from '@/components/ui/pagination.vue'
 import {
   Sidebar,
   SidebarContent,
@@ -89,7 +90,13 @@ const stats = computed(() => [
   { label: 'Stok Menipis', value: String(lowStockCount.value), note: `Stok ≤ ${lowStockThreshold}`, icon: TriangleAlert },
 ])
 
-const products = computed(() => produkList.value.slice(0, 5))
+const currentPage = ref(1)
+const perPage = 10
+const products = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  return produkList.value.slice(start, start + perPage)
+})
+const totalPages = computed(() => Math.max(1, Math.ceil(produkList.value.length / perPage)))
 
 const featuredCount = computed(() => produkList.value.filter(p => p.featured).length)
 const isFeaturedDisabled = (product: Produk) =>
@@ -363,6 +370,11 @@ const logout = async () => {
                 </tr>
               </tbody>
             </table>
+            <Pagination
+              :total="produkList.length"
+              :per-page="perPage"
+              v-model="currentPage"
+            />
           </CardContent>
         </Card>
       </div>
