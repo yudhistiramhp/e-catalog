@@ -13,8 +13,8 @@
         </div>
         <div class="footer-col">
           <h4 class="mb-4 font-body text-xs font-medium italic uppercase tracking-[0.1em] text-gold-soft">Kontak</h4>
-          <a href="https://wa.me/08123968327" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
-            WhatsApp: +62 812-3968-327
+          <a href="https://wa.me/081236336723" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
+            WhatsApp: +62 812-3633-6723
           </a>
           <a href="mailto:agungpradabali@gmail.com" class="block text-sm text-text-dim transition-colors hover:text-gold-soft">
             agungpradabali@gmail.com

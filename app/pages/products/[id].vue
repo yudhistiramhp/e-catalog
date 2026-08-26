@@ -201,7 +201,7 @@ useHead(() => ({
 
           <div class="flex flex-wrap gap-3 max-sm:flex-col">
             
-            <a :href="`https://wa.me/6281234567890?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(product.name)}`"
+            <a :href="`https://wa.me/628123968327?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(product.name)}`"
               target="_blank"
               rel="noopener"
               class="flex-1 bg-brown-950 px-7 py-3 text-center text-sm text-cream transition hover:bg-brown-700"

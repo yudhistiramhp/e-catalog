@@ -289,7 +289,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="space-y-3">
-                  <a :href="`https://wa.me/628123968327?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(selectedProduct.name)}`" target="_blank" rel="noopener" class="flex w-full items-center justify-center gap-2 rounded-lg bg-brown-950 px-6 py-3 text-center text-sm text-cream shadow-md transition-all duration-200 hover:bg-brown-800 hover:shadow-lg max-sm:py-2.5">
+                  <a :href="`https://wa.me/6281236336723?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(selectedProduct.name)}`" target="_blank" rel="noopener" class="flex w-full items-center justify-center gap-2 rounded-lg bg-brown-950 px-6 py-3 text-center text-sm text-cream shadow-md transition-all duration-200 hover:bg-brown-800 hover:shadow-lg max-sm:py-2.5">
                     <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.71.45 3.38 1.3 4.85L2 22l5.36-1.4a9.9 9.9 0 0 0 4.68 1.19h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.55-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.55 3.7-8.25 8.24-8.25Z"/></svg>
                     Hubungi via WhatsApp
                   </a>
