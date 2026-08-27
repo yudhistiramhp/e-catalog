@@ -133,6 +133,8 @@ const chartTitle = computed(() => {
   const map = { day: 'Harian', week: 'Mingguan', month: 'Bulanan' }
   return `Grafik Views ${map[selectedRange.value]}`
 })
+const totalViewsSum = computed(() => dailyChartData.value.reduce((sum, d) => sum + d.count, 0))
+const maxCount = computed(() => Math.max(...dailyChartData.value.map(d => d.count), 1))
 
 const currentPage = ref(1)
 const perPage = 10
@@ -359,7 +361,7 @@ const logout = async () => {
             </Card>
           </div>
 
-          <!-- Grafik Views Harian -->
+          <!-- Grafik Views -->
           <div class="mt-10">
             <div class="flex flex-wrap items-end gap-4 mb-4">
               <div class="flex gap-1">
@@ -381,31 +383,56 @@ const logout = async () => {
             </div>
             <h2 class="font-display text-xl text-brown-950 mb-4">{{ chartTitle }}</h2>
             <div class="rounded-none border border-gray-light bg-cream p-4">
-              <div class="w-full h-64 relative" :class="{ 'opacity-50 pointer-events-none': chartLoading }">
+              <div class="w-full relative max-h-72" :class="{ 'opacity-50 pointer-events-none': chartLoading }" style="aspect-ratio: 800/250;">
                 <svg class="w-full h-full" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
                   <!-- sumbu Y -->
                   <line x1="40" y1="20" x2="40" y2="280" stroke="#cbd5e1" stroke-width="1" />
                   <line x1="40" y1="280" x2="780" y2="280" stroke="#cbd5e1" stroke-width="1" />
                   <!-- label sumbu Y -->
-                  <text x="30" y="20" text-anchor="end" font-size="10" fill="#64748b">max</text>
-                  <text x="30" y="150" text-anchor="end" font-size="10" fill="#64748b">50%</text>
+                  <text x="30" y="20" text-anchor="end" font-size="10" fill="#64748b">{{ dailyChartData.length ? Math.max(...dailyChartData.map(d => d.count), 0) : 0 }}</text>
+                  <text x="30" y="150" text-anchor="end" font-size="10" fill="#64748b">{{ dailyChartData.length ? Math.round(Math.max(...dailyChartData.map(d => d.count), 0) / 2) : 0 }}</text>
                   <text x="30" y="280" text-anchor="end" font-size="10" fill="#64748b">0</text>
+                  <!-- total views -->
+                  <text v-if="dailyChartData.length" x="760" y="20" text-anchor="end" font-size="12" fill="#b89a5a" font-weight="bold">Total: {{ totalViewsSum }}</text>
                   <!-- jika tidak ada data -->
                   <text v-if="dailyChartData.length === 0" x="400" y="150" text-anchor="middle" font-size="14" fill="#94a3b8">Belum ada data views</text>
-                  <!-- batang -->
-                  <g v-for="(item, idx) in dailyChartData" :key="item.date">
-                    <rect
-                      :x="40 + (idx / Math.max(dailyChartData.length - 1, 1)) * 740"
-                      :y="280 - (item.count / Math.max(...dailyChartData.map(d => d.count), 1)) * 260"
-                      :width="Math.max(740 / dailyChartData.length * 0.6, 4)"
-                      :height="(item.count / Math.max(...dailyChartData.map(d => d.count), 1)) * 260"
-                      fill="#b89a5a"
-                      rx="2"
-                      class="transition-opacity hover:opacity-80"
+                  <!-- line chart -->
+                  <g v-if="dailyChartData.length > 1">
+                    <!-- area fill -->
+                    <polygon
+                      :points="dailyChartData.map((item, idx) => `${40 + (idx / (dailyChartData.length - 1)) * 740},${280 - (item.count / maxCount) * 260}`).join(' ') + ` ${40 + 740},280 40,280`"
+                      fill="rgba(184,154,90,0.15)"
+                      stroke="none"
                     />
-                    <!-- label tanggal (hanya beberapa) -->
+                    <!-- line -->
+                    <polyline
+                      :points="dailyChartData.map((item, idx) => `${40 + (idx / (dailyChartData.length - 1)) * 740},${280 - (item.count / maxCount) * 260}`).join(' ')"
+                      fill="none"
+                      stroke="#b89a5a"
+                      stroke-width="2"
+                      stroke-linejoin="round"
+                      stroke-linecap="round"
+                    />
+                    <!-- circles -->
+                    <circle
+                      v-for="(item, idx) in dailyChartData"
+                      :key="item.date"
+                      :cx="40 + (idx / (dailyChartData.length - 1)) * 740"
+                      :cy="280 - (item.count / maxCount) * 260"
+                      r="3"
+                      fill="#b89a5a"
+                      stroke="white"
+                      stroke-width="1"
+                    />
+                  </g>
+                  <!-- satu data point -->
+                  <circle v-if="dailyChartData.length === 1" :cx="40" :cy="280 - (dailyChartData[0].count / maxCount) * 260" r="4" fill="#b89a5a" />
+                  <!-- label tanggal -->
+                  <g v-if="dailyChartData.length">
                     <text
-                      v-if="idx % 5 === 0 || idx === dailyChartData.length - 1"
+                      v-for="(item, idx) in dailyChartData"
+                      :key="`label-${item.date}`"
+                      v-show="idx % Math.max(1, Math.floor(dailyChartData.length / 10)) === 0 || idx === dailyChartData.length - 1"
                       :x="40 + (idx / Math.max(dailyChartData.length - 1, 1)) * 740"
                       y="295"
                       text-anchor="middle"

@@ -4,7 +4,8 @@ import { useProduk } from '@/composables/useProduk'
 import { useStats } from '@/composables/useStats'
 import type { Kategori } from '@/types/kategori'
 import type { Produk } from '@/types/produk'
-import { Eye, MessageCircle } from '@lucide/vue'
+import { MessageCircle } from '@lucide/vue'
+import { formatNumber } from '@/utils/format'
 
 const activeCategory = ref('Semua')
 const searchQuery = ref('')
@@ -17,7 +18,7 @@ const loadingData = ref(true)
 const produkService = useProduk()
 const kategoriService = useKategori()
 const statsService = useStats()
-const { incrementWhatsappClick } = produkService
+const { incrementWhatsappClick, incrementProductView } = produkService
 const totalViews = ref(0)
 
 onMounted(() => {
@@ -104,6 +105,8 @@ function openModal(product: Produk) {
   selectedImage.value = product.jenis?.[0]?.colors.find(c => c.imageUrl)?.imageUrl ?? ''
   showModal.value = true
   document.body.style.overflow = 'hidden'
+  // record view with IP dedupe
+  incrementProductView(product.id)
 }
 
 function closeModal() {
@@ -205,16 +208,10 @@ useHead({
                 <span class="font-display text-lg text-gold">Rp {{ product.price.toLocaleString('id-ID') }}</span>
                 <div class="flex items-center gap-3 text-xs text-gray">
                   <span class="flex items-center gap-1">
-                    <Eye class="w-3.5 h-3.5" />
-                    <span>{{ product.views ?? 0 }}</span>
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 32 32" fill="currentColor">
-                      <path d="M16.001 3C9.373 3 4 8.373 4 15c0 2.362.688 4.564 1.875 6.417L4 29l7.771-1.833A11.93 11.93 0 0 0 16.001 27C22.628 27 28 21.627 28 15S22.628 3 16.001 3zm5.995 16.626c-.29.813-1.437 1.489-2.362 1.68-.628.129-1.448.232-4.207-.906-3.533-1.463-5.808-5.033-5.984-5.264-.169-.231-1.427-1.901-1.427-3.626s.895-2.573 1.213-2.926c.318-.353.694-.44.925-.44.231 0 .463.002.665.012.213.01.499-.081.78.596.29.694.984 2.394 1.07 2.568.087.174.145.377.029.61-.116.232-.174.377-.347.58-.174.202-.365.451-.522.606-.174.174-.355.362-.153.712.203.35.902 1.489 1.938 2.412 1.331 1.187 2.454 1.555 2.804 1.729.35.174.554.145.759-.087.203-.232.87-1.014 1.103-1.363.232-.35.464-.29.782-.174.318.116 2.017.951 2.363 1.124.348.174.579.261.665.406.087.145.087.837-.203 1.65z"/>
-                    </svg>
+                    <MessageCircle class="w-3.5 h-3.5" />
                     <span>{{ product.whatsappClicks ?? 0 }}</span>
                   </span>
-                  <span>{{ hasStock(product) ? 'Tersedia' : 'Habis' }}</span>
+                  <span :class="hasStock(product) ? 'text-emerald-600' : 'text-red-600'">{{ hasStock(product) ? 'Tersedia' : 'Habis' }}</span>
                 </div>
               </div>
             </div>
@@ -355,7 +352,7 @@ useHead({
     </Teleport>
     <div class="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-brown-border/60 bg-cream/95 px-4 py-2 text-sm text-brown-700 shadow-lg backdrop-blur-sm flex items-center gap-2">
       <span>👁</span>
-      <span>{{ totalViews }}</span>
+      <span>{{ formatNumber(totalViews) }}</span>
     </div>
   </main>
 </template>

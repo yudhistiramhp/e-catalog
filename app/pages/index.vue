@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { useProduk } from '@/composables/useProduk'
 import { useStats } from '@/composables/useStats'
-import { Eye, MessageCircle } from '@lucide/vue'
+import { MessageCircle } from '@lucide/vue'
 import type { Produk } from '@/types/produk'
+import { formatNumber } from '@/utils/format'
 
 const produkList = ref<Produk[]>([])
 const loadingData = ref(true)
 
 const produkService = useProduk()
 const statsService = useStats()
-const { incrementWhatsappClick } = produkService
+const { incrementWhatsappClick, incrementProductView } = produkService
 const totalViews = ref(0)
 
 onMounted(() => {
@@ -77,6 +78,8 @@ function openModal(product: Produk) {
   selectedImage.value = product.jenis?.[0]?.colors.find(c => c.imageUrl)?.imageUrl ?? ''
   showModal.value = true
   document.body.style.overflow = 'hidden'
+  // record view with IP dedupe
+  incrementProductView(product.id)
 }
 
 function closeModal() {
@@ -193,16 +196,12 @@ onUnmounted(() => {
             <p class="mb-4 line-clamp-2 text-sm text-text-muted">{{ product.description }}</p>
             <div class="flex items-center justify-between border-t border-brown-border pt-3">
               <span class="font-display text-lg text-gold-soft">Rp {{ product.price.toLocaleString('id-ID') }}</span>
-              <span class="text-xs" :class="hasStock(product) ? 'text-emerald-400' : 'text-red-400'">{{ hasStock(product) ? 'Tersedia' : 'Habis' }}</span>
-            </div>
-            <div class="flex items-center gap-3 text-xs text-text-muted mt-2">
-              <div class="flex items-center gap-1">
-                <Eye class="w-3.5 h-3.5" />
-                <span>{{ product.views ?? 0 }}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <MessageCircle class="w-3.5 h-3.5" />
-                <span>{{ product.whatsappClicks ?? 0 }}</span>
+              <div class="flex items-center gap-3 text-xs text-text-muted">
+                <span class="flex items-center gap-1">
+                  <MessageCircle class="w-3.5 h-3.5" />
+                  <span>{{ formatNumber(product.whatsappClicks ?? 0) }}</span>
+                </span>
+                <span :class="hasStock(product) ? 'text-emerald-400' : 'text-red-400'">{{ hasStock(product) ? 'Tersedia' : 'Habis' }}</span>
               </div>
             </div>
           </div>
@@ -334,7 +333,7 @@ onUnmounted(() => {
     </Teleport>
     <div class="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-brown-border/60 bg-cream/95 px-4 py-2 text-sm text-brown-700 shadow-lg backdrop-blur-sm flex items-center gap-2">
       <span>👁</span>
-      <span>{{ totalViews }}</span>
+      <span>{{ formatNumber(totalViews) }}</span>
     </div>
   </main>
 </template>

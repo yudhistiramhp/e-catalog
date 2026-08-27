@@ -18,21 +18,8 @@ export const useStats = () => {
   }
 
   const incrementView = async () => {
-    const statsRef = getStatsRef()
     try {
-      await updateDoc(statsRef, {
-        totalViews: increment(1),
-      })
-    } catch (e: any) {
-      if (e.code === 'not-found') {
-        await setDoc(statsRef, { totalViews: 1 })
-      } else {
-        console.error('Failed to increment view:', e)
-      }
-    }
-    // Record daily view
-    try {
-      await addDoc(viewsRef(), { timestamp: serverTimestamp() })
+      await $fetch('/api/stats/view', { method: 'POST' })
     } catch (e) {
       console.error('Failed to record view:', e)
     }

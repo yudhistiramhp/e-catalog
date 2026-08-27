@@ -90,11 +90,16 @@ export const useProduk = () => {
     })
   }
 
-  const incrementView = async (id: string): Promise<void> => {
-    await updateDoc(doc(fs, 'produk', id), {
-      views: increment(1)
-    })
+  const incrementProductView = async (id: string): Promise<void> => {
+    try {
+      await $fetch('/api/stats/product-view', {
+        method: 'POST',
+        body: { productId: id }
+      })
+    } catch (e) {
+      console.error('Failed to record product view:', e)
+    }
   }
 
-  return { subscribe, subscribeOne, add, update, remove, toggleFeatured, uploadImage, incrementWhatsappClick, incrementView }
+  return { subscribe, subscribeOne, add, update, remove, toggleFeatured, uploadImage, incrementWhatsappClick, incrementProductView }
 }
