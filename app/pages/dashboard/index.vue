@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   Boxes,
+  Eye,
   LayoutDashboard,
   LogOut,
   PackagePlus,
@@ -44,6 +45,7 @@ import {
 import { useAuthSession } from '@/composables/useSession'
 import { useKategori } from '@/composables/useKategori'
 import { useProduk } from '@/composables/useProduk'
+import { useStats } from '@/composables/useStats'
 import type { Kategori } from '@/types/kategori'
 import type { Produk } from '@/types/produk'
 
@@ -56,11 +58,48 @@ const kategoriList = ref<Kategori[]>([])
 
 const produkService = useProduk()
 const kategoriService = useKategori()
+const statsService = useStats()
+
+const loadingStats = ref(true)
+const dailyChartData = ref<{ date: string; count: number }[]>([])
+const chartLoading = ref(true)
+const startDate = ref(new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10))
+const endDate = ref(new Date().toISOString().slice(0, 10))
+const selectedRange = ref<'day' | 'week' | 'month'>('month')
+
+function setRange(range: 'day' | 'week' | 'month') {
+  selectedRange.value = range
+  const now = new Date()
+  if (range === 'day') {
+    startDate.value = new Date(now).toISOString().slice(0, 10)
+  } else if (range === 'week') {
+    startDate.value = new Date(now.getTime() - 7 * 86400000).toISOString().slice(0, 10)
+  } else {
+    startDate.value = new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10)
+  }
+  endDate.value = new Date().toISOString().slice(0, 10)
+  loadChartData()
+}
+
+async function loadChartData() {
+  chartLoading.value = true
+  const start = new Date(startDate.value)
+  const end = new Date(endDate.value)
+  end.setHours(23, 59, 59, 999)
+  const daily = await statsService.getDailyViews(start, end)
+  const sorted = Object.entries(daily)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([date, count]) => ({ date, count }))
+  dailyChartData.value = sorted
+  chartLoading.value = false
+}
 
 onMounted(() => {
   kategoriService.subscribe((items) => { kategoriList.value = items })
   const unsub = produkService.subscribe((items) => { produkList.value = items })
   onUnmounted(unsub)
+
+  loadChartData()
 })
 
 const navItems = [
@@ -89,6 +128,11 @@ const stats = computed(() => [
   { label: 'Total Kategori', value: String(kategoriList.value.length), note: 'Kategori aktif', icon: Tags },
   { label: 'Stok Menipis', value: String(lowStockCount.value), note: `Stok ≤ ${lowStockThreshold}`, icon: TriangleAlert },
 ])
+
+const chartTitle = computed(() => {
+  const map = { day: 'Harian', week: 'Mingguan', month: 'Bulanan' }
+  return `Grafik Views ${map[selectedRange.value]}`
+})
 
 const currentPage = ref(1)
 const perPage = 10
@@ -313,6 +357,65 @@ const logout = async () => {
                 {{ stat.note }}
               </CardContent>
             </Card>
+          </div>
+
+          <!-- Grafik Views Harian -->
+          <div class="mt-10">
+            <div class="flex flex-wrap items-end gap-4 mb-4">
+              <div class="flex gap-1">
+                <button @click="setRange('day')" class="rounded-none border border-gray-light px-3 py-1.5 text-sm" :class="selectedRange === 'day' ? 'bg-brown-950 text-cream' : 'bg-white text-brown-700 hover:border-brown-950'">Hari</button>
+                <button @click="setRange('week')" class="rounded-none border border-gray-light px-3 py-1.5 text-sm" :class="selectedRange === 'week' ? 'bg-brown-950 text-cream' : 'bg-white text-brown-700 hover:border-brown-950'">Minggu</button>
+                <button @click="setRange('month')" class="rounded-none border border-gray-light px-3 py-1.5 text-sm" :class="selectedRange === 'month' ? 'bg-brown-950 text-cream' : 'bg-white text-brown-700 hover:border-brown-950'">Bulan</button>
+              </div>
+              <div class="flex gap-2 items-end">
+                <div>
+                  <label class="block text-xs font-medium text-brown-700 mb-1">Mulai</label>
+                  <input type="date" v-model="startDate" class="border border-gray-light rounded px-3 py-1.5 text-sm bg-white text-brown-950" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-brown-700 mb-1">Sampai</label>
+                  <input type="date" v-model="endDate" class="border border-gray-light rounded px-3 py-1.5 text-sm bg-white text-brown-950" />
+                </div>
+                <button @click="loadChartData" class="rounded-none bg-brown-950 px-4 py-1.5 text-sm text-cream hover:bg-brown-700">Terapkan</button>
+              </div>
+            </div>
+            <h2 class="font-display text-xl text-brown-950 mb-4">{{ chartTitle }}</h2>
+            <div class="rounded-none border border-gray-light bg-cream p-4">
+              <div class="w-full h-64 relative" :class="{ 'opacity-50 pointer-events-none': chartLoading }">
+                <svg class="w-full h-full" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                  <!-- sumbu Y -->
+                  <line x1="40" y1="20" x2="40" y2="280" stroke="#cbd5e1" stroke-width="1" />
+                  <line x1="40" y1="280" x2="780" y2="280" stroke="#cbd5e1" stroke-width="1" />
+                  <!-- label sumbu Y -->
+                  <text x="30" y="20" text-anchor="end" font-size="10" fill="#64748b">max</text>
+                  <text x="30" y="150" text-anchor="end" font-size="10" fill="#64748b">50%</text>
+                  <text x="30" y="280" text-anchor="end" font-size="10" fill="#64748b">0</text>
+                  <!-- jika tidak ada data -->
+                  <text v-if="dailyChartData.length === 0" x="400" y="150" text-anchor="middle" font-size="14" fill="#94a3b8">Belum ada data views</text>
+                  <!-- batang -->
+                  <g v-for="(item, idx) in dailyChartData" :key="item.date">
+                    <rect
+                      :x="40 + (idx / Math.max(dailyChartData.length - 1, 1)) * 740"
+                      :y="280 - (item.count / Math.max(...dailyChartData.map(d => d.count), 1)) * 260"
+                      :width="Math.max(740 / dailyChartData.length * 0.6, 4)"
+                      :height="(item.count / Math.max(...dailyChartData.map(d => d.count), 1)) * 260"
+                      fill="#b89a5a"
+                      rx="2"
+                      class="transition-opacity hover:opacity-80"
+                    />
+                    <!-- label tanggal (hanya beberapa) -->
+                    <text
+                      v-if="idx % 5 === 0 || idx === dailyChartData.length - 1"
+                      :x="40 + (idx / Math.max(dailyChartData.length - 1, 1)) * 740"
+                      y="295"
+                      text-anchor="middle"
+                      font-size="8"
+                      fill="#64748b"
+                    >{{ item.date.slice(5) }}</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
           </div>
         </section>
 

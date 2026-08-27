@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  increment,
   onSnapshot,
   orderBy,
   query,
@@ -83,5 +84,17 @@ export const useProduk = () => {
     return res.url
   }
 
-  return { subscribe, subscribeOne, add, update, remove, toggleFeatured, uploadImage }
+  const incrementWhatsappClick = async (id: string): Promise<void> => {
+    await updateDoc(doc(fs, 'produk', id), {
+      whatsappClicks: increment(1)
+    })
+  }
+
+  const incrementView = async (id: string): Promise<void> => {
+    await updateDoc(doc(fs, 'produk', id), {
+      views: increment(1)
+    })
+  }
+
+  return { subscribe, subscribeOne, add, update, remove, toggleFeatured, uploadImage, incrementWhatsappClick, incrementView }
 }

@@ -14,6 +14,8 @@ export interface Produk {
   jenis: ProdukJenis[]
   stock: number
   featured?: boolean
+  whatsappClicks?: number
+  views?: number
   createdAt: number
   updatedAt: number
 }

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useKategori } from '@/composables/useKategori'
 import { useProduk } from '@/composables/useProduk'
+import { useStats } from '@/composables/useStats'
 import type { Kategori } from '@/types/kategori'
 import type { Produk } from '@/types/produk'
+import { Eye, MessageCircle } from '@lucide/vue'
 
 const activeCategory = ref('Semua')
 const searchQuery = ref('')
@@ -14,6 +16,9 @@ const loadingData = ref(true)
 
 const produkService = useProduk()
 const kategoriService = useKategori()
+const statsService = useStats()
+const { incrementWhatsappClick } = produkService
+const totalViews = ref(0)
 
 onMounted(() => {
   kategoriService.subscribe((items) => { kategoriList.value = items })
@@ -22,6 +27,12 @@ onMounted(() => {
     loadingData.value = false
   })
   onUnmounted(unsub)
+
+  statsService.incrementView()
+  const unsubStats = statsService.subscribe((data) => {
+    totalViews.value = data.totalViews
+  })
+  onUnmounted(unsubStats)
 })
 
 const categories = computed(() =>
@@ -100,6 +111,17 @@ function closeModal() {
   document.body.style.overflow = ''
 }
 
+async function handleWhatsAppClick(productId: string, productName: string) {
+  if (!productId) return
+  try {
+    await incrementWhatsappClick(productId)
+  } catch (e) {
+    console.error('Gagal mencatat klik WhatsApp:', e)
+  }
+  const url = `https://wa.me/6281236336723?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(productName)}`
+  window.open(url, '_blank')
+}
+
 useHead({
   title: 'Katalog — Agung Prada Bali',
   meta: [{ name: 'description', content: 'Jelajahi koleksi kain prada, songket, dan perlengkapan upacara khas Bali.' }],
@@ -111,8 +133,12 @@ useHead({
     <section class="px-6 pb-10 pt-12 max-sm:pb-6 max-sm:pt-8">
       <div class="mx-auto max-w-7xl">
         <span class="mb-3.5 inline-block text-xs italic uppercase tracking-[.18em] text-gold">Agung Prada Bali</span>
-        <h1 class="mb-4 font-display text-4xl max-sm:text-3xl">Katalog Produk</h1>
-        <p class="max-w-[50ch] text-brown-700">Jelajahi koleksi kain prada, songket, dan perlengkapan upacara khas Bali. Semua produk dikerjakan tangan oleh perajin berpengalaman.</p>
+        <div class="flex items-start justify-between">
+          <div>
+            <h1 class="mb-4 font-display text-4xl max-sm:text-3xl">Katalog Produk</h1>
+            <p class="max-w-[50ch] text-brown-700">Jelajahi koleksi kain prada, songket, dan perlengkapan upacara khas Bali. Semua produk dikerjakan tangan oleh perajin berpengalaman.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -177,7 +203,19 @@ useHead({
               <p class="mb-3 line-clamp-2 text-xs leading-relaxed text-brown-700">{{ product.description }}</p>
               <div class="flex items-center justify-between border-t border-gray-light pt-3">
                 <span class="font-display text-lg text-gold">Rp {{ product.price.toLocaleString('id-ID') }}</span>
-                <span class="text-xs text-gray">{{ hasStock(product) ? 'Tersedia' : 'Habis' }}</span>
+                <div class="flex items-center gap-3 text-xs text-gray">
+                  <span class="flex items-center gap-1">
+                    <Eye class="w-3.5 h-3.5" />
+                    <span>{{ product.views ?? 0 }}</span>
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 32 32" fill="currentColor">
+                      <path d="M16.001 3C9.373 3 4 8.373 4 15c0 2.362.688 4.564 1.875 6.417L4 29l7.771-1.833A11.93 11.93 0 0 0 16.001 27C22.628 27 28 21.627 28 15S22.628 3 16.001 3zm5.995 16.626c-.29.813-1.437 1.489-2.362 1.68-.628.129-1.448.232-4.207-.906-3.533-1.463-5.808-5.033-5.984-5.264-.169-.231-1.427-1.901-1.427-3.626s.895-2.573 1.213-2.926c.318-.353.694-.44.925-.44.231 0 .463.002.665.012.213.01.499-.081.78.596.29.694.984 2.394 1.07 2.568.087.174.145.377.029.61-.116.232-.174.377-.347.58-.174.202-.365.451-.522.606-.174.174-.355.362-.153.712.203.35.902 1.489 1.938 2.412 1.331 1.187 2.454 1.555 2.804 1.729.35.174.554.145.759-.087.203-.232.87-1.014 1.103-1.363.232-.35.464-.29.782-.174.318.116 2.017.951 2.363 1.124.348.174.579.261.665.406.087.145.087.837-.203 1.65z"/>
+                    </svg>
+                    <span>{{ product.whatsappClicks ?? 0 }}</span>
+                  </span>
+                  <span>{{ hasStock(product) ? 'Tersedia' : 'Habis' }}</span>
+                </div>
               </div>
             </div>
           </article>
@@ -303,10 +341,10 @@ useHead({
                 </div>
 
                 <div class="space-y-3">
-                  <a :href="`https://wa.me/6281236336723?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(selectedProduct.name)}`" target="_blank" rel="noopener" class="flex w-full items-center justify-center gap-2 rounded-lg bg-brown-950 px-6 py-3 text-center text-sm text-cream shadow-md transition-all duration-200 hover:bg-brown-800 hover:shadow-lg max-sm:py-2.5">
+                  <button @click="handleWhatsAppClick(selectedProduct.id, selectedProduct.name)" class="flex w-full items-center justify-center gap-2 rounded-lg bg-brown-950 px-6 py-3 text-center text-sm text-cream shadow-md transition-all duration-200 hover:bg-brown-800 hover:shadow-lg max-sm:py-2.5">
                     <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.71.45 3.38 1.3 4.85L2 22l5.36-1.4a9.9 9.9 0 0 0 4.68 1.19h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.55-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.55 3.7-8.25 8.24-8.25Z"/></svg>
                     Hubungi via WhatsApp
-                  </a>
+                  </button>
                   <!-- <NuxtLink :to="`/products/${selectedProduct.id}`" class="block w-full rounded-lg border border-gold bg-transparent px-6 py-3 text-center text-sm font-medium text-gold transition-all duration-200 hover:bg-gold hover:text-white max-sm:py-2.5" @click="closeModal">Lihat Detail Lengkap</NuxtLink> -->
                 </div>
               </div>
@@ -315,6 +353,10 @@ useHead({
         </div>
       </Transition>
     </Teleport>
+    <div class="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-brown-border/60 bg-cream/95 px-4 py-2 text-sm text-brown-700 shadow-lg backdrop-blur-sm flex items-center gap-2">
+      <span>👁</span>
+      <span>{{ totalViews }}</span>
+    </div>
   </main>
 </template>
 
