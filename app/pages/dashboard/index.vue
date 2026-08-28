@@ -415,7 +415,10 @@ const logout = async () => {
                   <text x="30" y="150" text-anchor="end" font-size="10" fill="#64748b">{{ dailyChartData.length ? Math.round(Math.max(...dailyChartData.map(d => d.count), 0) / 2) : 0 }}</text>
                   <text x="30" y="280" text-anchor="end" font-size="10" fill="#64748b">0</text>
                   <!-- total views -->
-                  <text v-if="dailyChartData.length" x="410" y="315" text-anchor="middle" font-size="12" fill="#b89a5a" font-weight="bold">Total: {{ totalViewsSum }}</text>
+                  <g v-if="dailyChartData.length">
+                    <rect x="371" y="258" width="78" height="18" fill="#fdfaf3" opacity="0.9" />
+                    <text x="410" y="270" text-anchor="middle" font-size="12" fill="#b89a5a" font-weight="bold">Total: {{ totalViewsSum }}</text>
+                  </g>
                   <!-- jika tidak ada data -->
                   <text v-if="dailyChartData.length === 0" x="400" y="150" text-anchor="middle" font-size="14" fill="#94a3b8">Belum ada data views</text>
                   <!-- line chart -->
