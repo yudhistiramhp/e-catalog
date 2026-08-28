@@ -136,6 +136,28 @@ const chartTitle = computed(() => {
 const totalViewsSum = computed(() => dailyChartData.value.reduce((sum, d) => sum + d.count, 0))
 const maxCount = computed(() => Math.max(...dailyChartData.value.map(d => d.count), 1))
 
+// --- Hover tooltip pada grafik ---
+const hoveredIndex = ref<number | null>(null)
+
+const pointX = (idx: number) => 40 + (idx / Math.max(dailyChartData.value.length - 1, 1)) * 740
+const pointY = (count: number) => 280 - (count / maxCount.value) * 260
+
+const hoveredPoint = computed(() => {
+  if (hoveredIndex.value === null) return null
+  const item = dailyChartData.value[hoveredIndex.value]
+  if (!item) return null
+  const x = pointX(hoveredIndex.value)
+  const y = pointY(item.count)
+  return {
+    x,
+    y,
+    tooltipX: Math.min(Math.max(x, 75), 745),
+    flip: y < 45, // terlalu dekat batas atas, tampilkan tooltip di bawah titik
+    date: item.date,
+    count: item.count,
+  }
+})
+
 const currentPage = ref(1)
 const perPage = 10
 const products = computed(() => {
@@ -400,13 +422,13 @@ const logout = async () => {
                   <g v-if="dailyChartData.length > 1">
                     <!-- area fill -->
                     <polygon
-                      :points="dailyChartData.map((item, idx) => `${40 + (idx / (dailyChartData.length - 1)) * 740},${280 - (item.count / maxCount) * 260}`).join(' ') + ` ${40 + 740},280 40,280`"
+                      :points="dailyChartData.map((item, idx) => `${pointX(idx)},${pointY(item.count)}`).join(' ') + ` ${40 + 740},280 40,280`"
                       fill="rgba(184,154,90,0.15)"
                       stroke="none"
                     />
                     <!-- line -->
                     <polyline
-                      :points="dailyChartData.map((item, idx) => `${40 + (idx / (dailyChartData.length - 1)) * 740},${280 - (item.count / maxCount) * 260}`).join(' ')"
+                      :points="dailyChartData.map((item, idx) => `${pointX(idx)},${pointY(item.count)}`).join(' ')"
                       fill="none"
                       stroke="#b89a5a"
                       stroke-width="2"
@@ -417,12 +439,24 @@ const logout = async () => {
                     <circle
                       v-for="(item, idx) in dailyChartData"
                       :key="item.date"
-                      :cx="40 + (idx / (dailyChartData.length - 1)) * 740"
-                      :cy="280 - (item.count / maxCount) * 260"
-                      r="3"
+                      :cx="pointX(idx)"
+                      :cy="pointY(item.count)"
+                      :r="hoveredIndex === idx ? 5 : 3"
                       fill="#b89a5a"
                       stroke="white"
                       stroke-width="1"
+                    />
+                    <!-- hit area untuk hover (lebih besar agar mudah di-hover) -->
+                    <circle
+                      v-for="(item, idx) in dailyChartData"
+                      :key="`hit-${item.date}`"
+                      :cx="pointX(idx)"
+                      :cy="pointY(item.count)"
+                      r="10"
+                      fill="transparent"
+                      style="cursor: pointer;"
+                      @mouseenter="hoveredIndex = idx"
+                      @mouseleave="hoveredIndex = null"
                     />
                   </g>
                   <!-- satu data point -->
@@ -440,6 +474,13 @@ const logout = async () => {
                       fill="#64748b"
                     >{{ item.date.slice(5) }}</text>
                   </g>
+                 <!-- tooltip hover -->
+                  <g v-if="hoveredPoint" :transform="`translate(${hoveredPoint.tooltipX}, ${hoveredPoint.y})`" style="pointer-events: none;">
+                    <rect x="-38" :y="hoveredPoint.flip ? 10 : -40" width="76" height="30" rx="3" fill="#3b2a1a" opacity="0.92" />
+                    <text x="0" :y="hoveredPoint.flip ? 25 : -25" text-anchor="middle" font-size="10" font-weight="bold" fill="#f5efe0">{{ hoveredPoint.count }} views</text>
+                    <text x="0" :y="hoveredPoint.flip ? 37 : -13" text-anchor="middle" font-size="8" fill="#e0d4bb">{{ hoveredPoint.date }}</text>
+                  </g>
+                  <circle v-if="hoveredPoint" :cx="hoveredPoint.x" :cy="hoveredPoint.y" r="4" fill="#b89a5a" stroke="white" stroke-width="1.5" style="pointer-events: none;" />
                 </svg>
               </div>
             </div>
