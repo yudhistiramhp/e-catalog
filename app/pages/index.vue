@@ -88,14 +88,28 @@ function closeModal() {
 }
 
 async function handleWhatsAppClick(productId: string, productName: string) {
-  if (!productId) return
+  // Buka window kosong secara sinkron dulu (masih dianggap user gesture oleh Safari)
+  const newWindow = window.open('', '_blank')
+
+  if (!productId) {
+    newWindow?.close()
+    return
+  }
+
   try {
     await incrementWhatsappClick(productId)
   } catch (e) {
     console.error('Gagal mencatat klik WhatsApp:', e)
   }
+
   const url = `https://wa.me/6281236336723?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(productName)}`
-  window.open(url, '_blank')
+
+  if (newWindow) {
+    newWindow.location.href = url
+  } else {
+    // fallback kalau popup diblokir sejak awal
+    window.open(url, '_blank')
+  }
 }
 
 const rituals = [
@@ -160,9 +174,7 @@ onUnmounted(() => {
               </div>
             </Transition>
             <div class="flex flex-wrap justify-center gap-4">
-              <!-- <a href="#kain-prada" class="bg-brown-950 px-7 py-3 text-sm text-cream transition hover:bg-brown-700">Lihat Kain Prada</a> -->
               <NuxtLink to="/catalog" class="border border-gold px-7 py-3 text-sm text-white transition hover:bg-gold hover:text-white">Lihat Katalog</NuxtLink>
-              <!-- <a href="#alat-upacara" class="border border-brown-border px-7 py-3 text-sm text-brown-700 transition hover:border-gold hover:text-gold">Lihat Alat Upacara</a> -->
             </div>
           </div>
         </div>

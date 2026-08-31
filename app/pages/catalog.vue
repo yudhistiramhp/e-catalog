@@ -115,14 +115,28 @@ function closeModal() {
 }
 
 async function handleWhatsAppClick(productId: string, productName: string) {
-  if (!productId) return
+  // Buka window kosong secara sinkron dulu (masih dianggap user gesture oleh Safari)
+  const newWindow = window.open('', '_blank')
+
+  if (!productId) {
+    newWindow?.close()
+    return
+  }
+
   try {
     await incrementWhatsappClick(productId)
   } catch (e) {
     console.error('Gagal mencatat klik WhatsApp:', e)
   }
+
   const url = `https://wa.me/6281236336723?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(productName)}`
-  window.open(url, '_blank')
+
+  if (newWindow) {
+    newWindow.location.href = url
+  } else {
+    // fallback kalau popup diblokir sejak awal
+    window.open(url, '_blank')
+  }
 }
 
 useHead({
